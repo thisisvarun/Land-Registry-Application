@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Web3 from 'web3';
 import LandRegistryABI from '../LandRegistry.json'; // From build/contracts/
+// import LandRegistryABI from '../LandRegistry.json'; // Adjust path if needed
 
 const CONTRACT_ADDRESS = "0xdBe3ED3Dfd58F15a50A941Bd8aA2EED60E932Aec";
 
