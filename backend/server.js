@@ -3,9 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Web3 = require('web3');
 const User = require('./models/User');
 const Land = require('./models/Land');
+const { Web3 } = require('web3');
 
 const app = express();
 app.use(express.json());
