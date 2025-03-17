@@ -4,7 +4,7 @@ import Web3 from 'web3';
 import LandRegistryABI from '../LandRegistry.json'; // From build/contracts/
 // import LandRegistryABI from '../LandRegistry.json'; // Adjust path if needed
 
-const CONTRACT_ADDRESS = "0xdBe3ED3Dfd58F15a50A941Bd8aA2EED60E932Aec";
+const CONTRACT_ADDRESS = "0x9d837A129664AD06534CFD9E735db4a6826E3040";
 
 function Dashboard({ token, role }) {
   const [web3, setWeb3] = useState(null);
