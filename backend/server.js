@@ -3,12 +3,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Web3 } = require('web3');
+const cors = require('cors'); // Add this
 const User = require('./models/User');
 const Land = require('./models/Land');
-const { Web3 } = require('web3');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
