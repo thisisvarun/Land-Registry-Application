@@ -13,7 +13,9 @@
     "@truffle/hdwallet-provider": "^2.1.15",
     "axios": "^1.8.3",
     "dotenv": "^16.4.7",
+    "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
+    "react-scripts": "^5.0.1",
     "web3": "^4.16.0"
   }
 }
