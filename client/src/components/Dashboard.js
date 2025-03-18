@@ -3,8 +3,9 @@ import axios from 'axios';
 import Web3 from 'web3';
 import { useNavigate } from 'react-router-dom';
 import LandRegistryABI from '../LandRegistry.json';
+import '../styles.css';
 
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS; //
+const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 function Dashboard({ token, role }) {
   const [web3, setWeb3] = useState(null);
@@ -14,7 +15,7 @@ function Dashboard({ token, role }) {
   const [surveyNumber, setSurveyNumber] = useState('');
   const [details, setDetails] = useState('');
   const [pendingRequests, setPendingRequests] = useState([]);
-  const navigate = useNavigate(); // Add this
+  const navigate = useNavigate();
 
   useEffect(() => {
     const init = async () => {
@@ -49,6 +50,8 @@ function Dashboard({ token, role }) {
     if (contract && account) {
       await contract.methods.requestLandRegistration(surveyNumber, details).send({ from: account });
       alert('Land registration requested!');
+      setSurveyNumber('');
+      setDetails('');
     }
   };
 
@@ -61,46 +64,68 @@ function Dashboard({ token, role }) {
     }
   };
 
-  const handleLogout = () => { // Add this
+  const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     navigate('/');
   };
 
   return (
-    <div>
-      <h1>{role === 'government' ? 'Government Dashboard' : 'Civilian Dashboard'}</h1>
-      <button onClick={handleLogout}>Logout</button> {/* Add this */}
-      {role === 'civilian' && (
-        <div>
-          <h2>Register New Land</h2>
-          <input value={surveyNumber} onChange={(e) => setSurveyNumber(e.target.value)} placeholder="Survey Number" />
-          <input value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Details" />
-          <button onClick={registerLand}>Request Registration</button>
-          <h2>Your Lands</h2>
-          {lands.map(land => (
-            <div key={land.landId}>
-              <p>Survey: {land.surveyNumber}</p>
-              <button>List for Sale</button>
+    <div className="dashboard-container">
+      <header className="header">
+        <h1 className="title">{role === 'government' ? 'Government Dashboard' : 'Civilian Dashboard'}</h1>
+        <button onClick={handleLogout} className="logout-button">Logout</button>
+      </header>
+      <div className="content">
+        {role === 'civilian' && (
+          <div>
+            <div className="card">
+              <h2 className="subtitle">Register New Land</h2>
+              <input
+                value={surveyNumber}
+                onChange={(e) => setSurveyNumber(e.target.value)}
+                placeholder="Survey Number"
+                className="input"
+              />
+              <input
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Details"
+                className="input"
+              />
+              <button onClick={registerLand} className="button">Request Registration</button>
             </div>
-          ))}
-        </div>
-      )}
-      {role === 'government' && (
-        <div>
-          <h2>Pending Land Registrations</h2>
-          {pendingRequests.length > 0 ? (
-            pendingRequests.map(request => (
-              <div key={request.id}>
-                <p>Survey: {request.surveyNumber}, Owner: {request.owner}</p>
-                <button onClick={() => approveRegistration(request.id)}>Approve</button>
-              </div>
-            ))
-          ) : (
-            <p>No pending requests</p>
-          )}
-        </div>
-      )}
+            <div className="card">
+              <h2 className="subtitle">Your Lands</h2>
+              {lands.length > 0 ? (
+                lands.map(land => (
+                  <div key={land.landId} className="land-item">
+                    <p>Survey: {land.surveyNumber}</p>
+                    <button className="action-button">List for Sale</button>
+                  </div>
+                ))
+              ) : (
+                <p className="empty-text">No lands registered</p>
+              )}
+            </div>
+          </div>
+        )}
+        {role === 'government' && (
+          <div className="card">
+            <h2 className="subtitle">Pending Land Registrations</h2>
+            {pendingRequests.length > 0 ? (
+              pendingRequests.map(request => (
+                <div key={request.id} className="land-item">
+                  <p>Survey: {request.surveyNumber}, Owner: {request.owner}</p>
+                  <button onClick={() => approveRegistration(request.id)} className="action-button">Approve</button>
+                </div>
+              ))
+            ) : (
+              <p className="empty-text">No pending requests</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../styles.css';
 
 function Login({ setToken, setRole }) {
   const [email, setEmail] = useState('');
@@ -17,12 +18,26 @@ function Login({ setToken, setRole }) {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-      <button onClick={handleLogin}>Login</button>
-      <button onClick={() => navigate('/signup')}>Signup</button>
+    <div className="container">
+      <div className="card">
+        <h2 className="title">Login</h2>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="input"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="input"
+        />
+        <button onClick={handleLogin} className="button">Login</button>
+        <p className="link" onClick={() => navigate('/signup')}>Need an account? Sign Up</p>
+      </div>
     </div>
   );
 }
