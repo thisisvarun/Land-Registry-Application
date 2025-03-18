@@ -4,16 +4,18 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Web3 } = require('web3');
-const cors = require('cors'); // Add this
+const cors = require('cors');
 const User = require('./models/User');
 const Land = require('./models/Land');
 const LandRegistryABI = require('./LandRegistry.json');
 
-const CONTRACT_ADDRESS = "0xb25C4F8C45f1586F18a8EbCb8b7153Cf673F6011"; // From truffle migrate
-
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+
+// Rest of your server.js code...
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -79,14 +81,19 @@ app.get('/pending-registrations', auth, async (req, res) => {
   if (req.user.role !== 'government') return res.status(403).json({ message: 'Government only' });
   const contract = new web3.eth.Contract(LandRegistryABI.abi, CONTRACT_ADDRESS);
   try {
-    const landCount = await contract.methods.landCount().call();
+    const landCount = Number(await contract.methods.landCount().call()); // Convert BigInt to number
     const pending = [];
     for (let i = 1; i <= landCount; i++) {
       const isPending = await contract.methods.pendingRegistrations(i).call();
       if (isPending) {
         try {
           const land = await contract.methods.getLand(i).call();
-          pending.push({ id: land[0], surveyNumber: land[1], details: land[2], owner: land[3] });
+          pending.push({
+            id: land[0].toString(), // Convert BigInt to string
+            surveyNumber: land[1],
+            details: land[2],
+            owner: land[3]
+          });
         } catch (err) {
           console.error(`Failed to fetch land ${i}:`, err.message);
         }
@@ -103,13 +110,36 @@ app.get('/pending-registrations', auth, async (req, res) => {
 app.post('/approve-registration/:id', auth, async (req, res) => {
   if (req.user.role !== 'government') return res.status(403).json({ message: 'Government only' });
   const { id } = req.params;
-  const user = await User.findOne({ id: req.user.id }); // Get government account
+  const user = await User.findOne({ id: req.user.id });
   const contract = new web3.eth.Contract(LandRegistryABI.abi, CONTRACT_ADDRESS);
   try {
-    await contract.methods.approveLandRegistration(id).send({ from: user.address });
+    console.log("Approving with address:", user.address, "ID:", id);
+    const tx = contract.methods.approveLandRegistration(id);
+    const gas = await tx.estimateGas({ from: user.address });
+    const signedTx = await web3.eth.accounts.signTransaction(
+      {
+        to: CONTRACT_ADDRESS,
+        data: tx.encodeABI(),
+        gas,
+        from: user.address
+      },
+      user.privateKey
+    );
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    console.log("Approval transaction:", receipt.transactionHash);
     res.json({ message: 'Land registration approved' });
   } catch (error) {
-    res.status(500).json({ message: 'Approval failed', error });
+    if (error.message.includes("revert")) {
+      // Attempt to decode revert reason
+      try {
+        const txCall = await contract.methods.approveLandRegistration(id).call({ from: user.address });
+        console.log("Unexpected success on call:", txCall); // Shouldn’t reach here if reverted
+      } catch (revertError) {
+        console.error("Revert reason:", revertError.message);
+      }
+    }
+    console.error("Approval error:", error.message, error.stack);
+    res.status(500).json({ message: 'Approval failed', error: error.message });
   }
 });
 

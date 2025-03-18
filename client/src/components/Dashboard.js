@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Web3 from 'web3';
-import { useNavigate } from 'react-router-dom'; // Add this
+import { useNavigate } from 'react-router-dom';
 import LandRegistryABI from '../LandRegistry.json';
 
-const CONTRACT_ADDRESS = "0xb25C4F8C45f1586F18a8EbCb8b7153Cf673F6011";
+const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS; //
 
 function Dashboard({ token, role }) {
   const [web3, setWeb3] = useState(null);

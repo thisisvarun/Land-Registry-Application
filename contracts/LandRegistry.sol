@@ -2,7 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract LandRegistry {
-    address public government;
+    address public government; // Original deployer
+    mapping(address => bool) public governmentUsers; // Multiple government users
 
     struct Land {
         uint id;
@@ -28,12 +29,18 @@ contract LandRegistry {
     event TransferApproved(uint id, address from, address to, uint stampDuty);
 
     constructor() {
-        government = msg.sender; // Deployer is government
+        government = msg.sender; // Deployer is the initial government
+        governmentUsers[msg.sender] = true; // Add deployer to government users
     }
 
     modifier onlyGovernment() {
-        require(msg.sender == government, "Only government can call this");
+        require(governmentUsers[msg.sender], "Only government can call this");
         _;
+    }
+
+    // Add a new government user
+    function addGovernment(address _gov) public onlyGovernment {
+        governmentUsers[_gov] = true;
     }
 
     // Register new land (civilian request)
